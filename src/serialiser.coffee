@@ -193,6 +193,19 @@ nodeSerialisers =
           serialisedChildren.push(accumulatedWhitespace + serialisedChild)
           accumulatedWhitespace = ''
 
+    # SPECIAL NODE: If
+    if node.value is 'If'
+      [condition, contents...] = serialisedChildren
+      condition = /{"condition": \((.*)\)}/.exec(condition)?[1]
+      contents = @jsxExpression @reactObject, '"span"', joinList(contents)
+      whitespace = accumulatedWhitespace.replace /[\r\n]/g, ''
+      return """(( ->
+        #{whitespace}  return unless #{condition}
+        #{whitespace}  #{contents}
+        #{whitespace})())
+      """
+    # END SPECIAL NODE
+
     if serialisedChildren.length
       serialisedChildren[serialisedChildren.length-1] += accumulatedWhitespace
       accumulatedWhitespace = ''
