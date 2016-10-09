@@ -9,7 +9,7 @@
     "coffee-react"
   ],
   "author": "James Friend",
-  "version": "5.0.2",
+  "version": "5.0.4",
   "licenses": [
     {
       "type": "MIT",
@@ -39,8 +39,5 @@
     "coffee-script": "^1.9.1",
     "colors": "^0.6.2",
     "diff": "^1.0.8"
-  },
-  "dependencies": {
-    "st-cjsx-loader": "5.0.1"
   }
 }
