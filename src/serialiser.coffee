@@ -184,9 +184,10 @@ nodeSerialisers =
     [condition, contents...] = children
     condition = /{"condition": (.*)}/.exec(condition)?[1]
     whitespace = contents[0].match(/^(""")?[\r\n](\s+)/)?[2] or ''
+    for line, index in contents
+      if line.indexOf('"""') is 0
+        contents[index] = @jsxExpression @reactObject, '"span"', line
     contents = joinList contents
-    if contents.indexOf('"""') is 0
-      contents = @jsxExpression @reactObject, '"span"', contents
     return """(( ->
       #{whitespace}return unless #{condition}
       #{whitespace}#{contents}
