@@ -180,6 +180,44 @@ nodeSerialisers =
 
   CJSX_PRAGMA: -> "`/** @jsx #{@domObject} */`"
 
+  CJSX_IF: (node, children) ->
+    [condition, contents...] = children
+    condition = /{"condition": (.*)}/.exec(condition)?[1]
+    whitespace = contents[0].match(/^(""")?[\r\n](\s+)/)?[2] or ''
+    contents = joinList contents
+    if contents.indexOf('"""') is 0
+      contents = @jsxExpression @reactObject, '"span"', contents
+    return """(( ->
+      #{whitespace}return unless #{condition}
+      #{whitespace}#{contents}
+      #{whitespace.replace '  ', ''})())
+    """
+
+  CJSX_SWITCH: (node, children) ->
+    [condition, contents...] = children
+    condition = /{"condition": (.*)}/.exec(condition)?[1]
+    whitespace = contents[0]?.match(/^(""")?[\r\n](\s+)/)?[2] or ''
+    contents = joinList(contents)
+    output = "(( ->\n"
+    output += "#{whitespace}switch #{condition}\n"
+    for line in contents.split '\n'
+      output += "  #{line.replace /,$/, ''}\n"
+    output += "#{whitespace.replace '  ', ''})())\n"
+    return output
+
+  CJSX_WHEN: (node, children) ->
+    [value, contents...] = children
+    value = /{"value": (.*)}/.exec(value)?[1]
+    whitespace = contents[0]?.match(/^(""")?[\r\n](\s+)/)?[2] or ''
+
+    contents = joinList contents
+    if contents.indexOf('"""') is 0
+      contents = @jsxExpression @reactObject, '"span"', contents
+
+    return """when #{value}
+      #{whitespace}#{contents}
+    """
+
   CJSX_EL: (node) ->
     serialisedChildren = []
     accumulatedWhitespace = ''
@@ -193,18 +231,14 @@ nodeSerialisers =
           serialisedChildren.push(accumulatedWhitespace + serialisedChild)
           accumulatedWhitespace = ''
 
-    # SPECIAL NODE: If
     if node.value is 'If'
-      [condition, contents...] = serialisedChildren
-      condition = /{"condition": \((.*)\)}/.exec(condition)?[1]
-      contents = @jsxExpression @reactObject, '"span"', joinList(contents)
-      whitespace = accumulatedWhitespace.replace /[\r\n]/g, ''
-      return """(( ->
-        #{whitespace}  return unless #{condition}
-        #{whitespace}  #{contents}
-        #{whitespace})())
-      """
-    # END SPECIAL NODE
+      return nodeSerialisers.CJSX_IF.call this, node, serialisedChildren
+
+    if node.value is 'Switch'
+      return nodeSerialisers.CJSX_SWITCH.call this, node, serialisedChildren
+
+    if node.value is 'When'
+      return nodeSerialisers.CJSX_WHEN.call this, node, serialisedChildren
 
     if serialisedChildren.length
       serialisedChildren[serialisedChildren.length-1] += accumulatedWhitespace
