@@ -184,15 +184,17 @@ nodeSerialisers =
     [condition, contents...] = children
     condition = /{"condition": (.*)}/.exec(condition)?[1]
     whitespace = contents[0].match(/^(""")?[\r\n](\s+)/)?[2] or ''
-    for line, index in contents
-      if line.indexOf('"""') is 0
-        line = @jsxExpression @reactObject, '"span"', line
-        contents[index] = "#{whitespace}#{line}"
+
+    # wrap all contents in a span
+    contents.unshift 'null'
     contents = joinList contents
+    contents = whitespace + @jsxExpression @reactObject, '"span"', contents
+
+    # build output
     output = "(( =>\n"
     output += "#{whitespace}return unless #{condition}\n"
     for line in contents.split '\n'
-      output += "#{line.replace /,$/, ''}\n"
+      output += "#{line}\n"
     output += "#{whitespace.replace '  ', ''})())"
     return output
 
@@ -215,6 +217,7 @@ nodeSerialisers =
 
     contents = joinList contents
     if contents.indexOf('"""') is 0
+      contents.unshift 'null'
       contents = @jsxExpression @reactObject, '"span"', contents
 
     return """when #{value}
