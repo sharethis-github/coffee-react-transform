@@ -1,5 +1,5 @@
 {
-  "name": "coffee-react-transform",
+  "name": "@st-operations/cjsx-loader",
   "description": "React JSX support for Coffeescript",
   "keywords": [
     "coffeescript",
@@ -20,6 +20,7 @@
     "test": "cake build && cake test",
     "prepublish": "cake build"
   },
+  "main": "loader.js",
   "files": [
     "index.js",
     "lib/",
