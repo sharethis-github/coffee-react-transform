@@ -188,11 +188,12 @@ nodeSerialisers =
       if line.indexOf('"""') is 0
         contents[index] = @jsxExpression @reactObject, '"span"', line
     contents = joinList contents
-    return """(( ->
-      #{whitespace}return unless #{condition}
-      #{whitespace}#{contents}
-      #{whitespace.replace '  ', ''})())
-    """
+    output = "(( ->\n"
+    output += "#{whitespace}return unless #{condition}\n"
+    for line in contents.split '\n'
+      output += "  #{line.replace /,$/, ''}\n"
+    output += "#{whitespace.replace '  ', ''})())"
+    return output
 
   CJSX_SWITCH: (node, children) ->
     [condition, contents...] = children
@@ -203,7 +204,7 @@ nodeSerialisers =
     output += "#{whitespace}switch #{condition}\n"
     for line in contents.split '\n'
       output += "  #{line.replace /,$/, ''}\n"
-    output += "#{whitespace.replace '  ', ''})())\n"
+    output += "#{whitespace.replace '  ', ''})())"
     return output
 
   CJSX_WHEN: (node, children) ->
