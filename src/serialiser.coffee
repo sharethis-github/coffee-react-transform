@@ -185,6 +185,7 @@ nodeSerialisers =
     whitespace = contents[0].match(/^(""")?[\r\n](\s+)/)?[2] or ''
 
     # get condition
+    attrs = attrs.replace /(\s*[\r\n]\s*)/g, ' '
     _condition = /{"condition": (.*)}/.exec(attrs)?[1]
     _not = /{"not": (.*)}/.exec(attrs)?[1]
     _isnt = /{"isnt": (.*)}/.exec(attrs)?[1]
