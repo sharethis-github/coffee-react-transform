@@ -208,12 +208,12 @@ nodeSerialisers =
     return output
 
   CJSX_SWITCH: (node, children) ->
-    [condition, contents...] = children
-    condition = /{"condition": (.*)}/.exec(condition)?[1]
+    [attrs, contents...] = children
+    value = /{"value": (.*)}/.exec(attrs)?[1]
     whitespace = contents[0]?.match(/^(""")?[\r\n](\s+)/)?[2] or ''
     contents = joinList(contents)
     output = "(( =>\n"
-    output += "#{whitespace}switch #{condition}\n"
+    output += "#{whitespace}switch #{value}\n"
     for line in contents.split '\n'
       output += "  #{line.replace /,$/, ''}\n"
     output += "#{whitespace.replace '  ', ''})())"
