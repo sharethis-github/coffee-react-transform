@@ -187,9 +187,12 @@ nodeSerialisers =
     # get condition
     _condition = /{"condition": (.*)}/.exec(attrs)?[1]
     _not = /{"not": (.*)}/.exec(attrs)?[1]
+    _isnt = /{"isnt": (.*)}/.exec(attrs)?[1]
     _is = /{"is": (.*)}/.exec(attrs)?[1]
-    condition = _condition or _is
+    _has = /{"has": (.*)}/.exec(attrs)?[1]
+    condition = _condition or _is or _has
     condition ?= "!#{_not}" if _not
+    condition ?= "!#{_isnt}" if _isnt
 
     # wrap all contents in a span
     contents.unshift 'null'
