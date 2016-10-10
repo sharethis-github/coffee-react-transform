@@ -181,9 +181,15 @@ nodeSerialisers =
   CJSX_PRAGMA: -> "`/** @jsx #{@domObject} */`"
 
   CJSX_IF: (node, children) ->
-    [condition, contents...] = children
-    condition = /{"condition": (.*)}/.exec(condition)?[1]
+    [attrs, contents...] = children
     whitespace = contents[0].match(/^(""")?[\r\n](\s+)/)?[2] or ''
+
+    # get condition
+    _condition = /{"condition": (.*)}/.exec(attrs)?[1]
+    _not = /{"not": (.*)}/.exec(attrs)?[1]
+    _is = /{"is": (.*)}/.exec(attrs)?[1]
+    condition = _condition or _is
+    condition ?= "!#{_not}" if _not
 
     # wrap all contents in a span
     contents.unshift 'null'
@@ -217,7 +223,7 @@ nodeSerialisers =
 
     contents = joinList contents
     if contents.indexOf('"""') is 0
-      contents.unshift 'null'
+      contents = joinList ['null', contents]
       contents = @jsxExpression @reactObject, '"span"', contents
 
     return """when #{value}
